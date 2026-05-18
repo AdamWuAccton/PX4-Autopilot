@@ -88,6 +88,7 @@ fi
 
 #external baro
 icp201xx -X start
+dps310 -X start
 
 unset INA_CONFIGURED
 unset HAVE_PM2
