@@ -36,14 +36,24 @@
 #include <nuttx/spi/spi.h>
 
 constexpr px4_spi_bus_t px4_spi_buses[SPI_BUS_MAX_BUS_ITEMS] = {
-        initSPIBus(SPI::Bus::SPI1, {
-                initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, SPI::CS{GPIO::PortI, GPIO::Pin9}, SPI::DRDY{GPIO::PortF, GPIO::Pin2}),
-                initSPIDevice(DRV_IMU_DEVTYPE_ICM45686, SPI::CS{GPIO::PortI, GPIO::Pin9}, SPI::DRDY{GPIO::PortF, GPIO::Pin2}),
-        }, {GPIO::PortI, GPIO::Pin11}),
-        initSPIBus(SPI::Bus::SPI2, {
-                initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, SPI::CS{GPIO::PortH, GPIO::Pin5}, SPI::DRDY{GPIO::PortA, GPIO::Pin10}),
-                initSPIDevice(DRV_IMU_DEVTYPE_ICM45686, SPI::CS{GPIO::PortH, GPIO::Pin5}, SPI::DRDY{GPIO::PortA, GPIO::Pin10}),
-        }, {GPIO::PortF, GPIO::Pin4}),
+	initSPIBus(SPI::Bus::SPI1, {
+		initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, SPI::CS{GPIO::PortI, GPIO::Pin9}, SPI::DRDY{GPIO::PortF, GPIO::Pin2}),
+		initSPIDevice(DRV_IMU_DEVTYPE_ICM45686, SPI::CS{GPIO::PortI, GPIO::Pin9}, SPI::DRDY{GPIO::PortF, GPIO::Pin2}),
+		// Both ICM56686 are polled rather than interrupt driven: PA10 carries no usable INT1 edge
+		// from the SPI2 part, and polling keeps the two instances on identical sample timing.
+		initSPIDevice(DRV_IMU_DEVTYPE_ICM56686, SPI::CS{GPIO::PortI, GPIO::Pin9}),
+		// LSM6DSK320X is an alternate part for the ICM42688P/ICM45686/ICM56686 footprint. Declared
+		// without DRDY (polled) because the ST INT1 pad mapping on this footprint is unconfirmed;
+		// the driver falls back to its own scheduled FIFO reads when drdy_gpio == 0.
+		initSPIDevice(DRV_IMU_DEVTYPE_ST_LSM6DSV, SPI::CS{GPIO::PortI, GPIO::Pin9}),
+	}, {GPIO::PortI, GPIO::Pin11}),
+	initSPIBus(SPI::Bus::SPI2, {
+		initSPIDevice(DRV_IMU_DEVTYPE_ICM42688P, SPI::CS{GPIO::PortH, GPIO::Pin5}, SPI::DRDY{GPIO::PortA, GPIO::Pin10}),
+		initSPIDevice(DRV_IMU_DEVTYPE_ICM45686, SPI::CS{GPIO::PortH, GPIO::Pin5}, SPI::DRDY{GPIO::PortA, GPIO::Pin10}),
+		// See the SPI1 note above: polled, and PA10 never delivered an INT1 edge on two boards.
+		initSPIDevice(DRV_IMU_DEVTYPE_ICM56686, SPI::CS{GPIO::PortH, GPIO::Pin5}),
+		initSPIDevice(DRV_IMU_DEVTYPE_ST_LSM6DSV, SPI::CS{GPIO::PortH, GPIO::Pin5}),
+	}, {GPIO::PortF, GPIO::Pin4}),
 	initSPIBus(SPI::Bus::SPI3, {
 		initSPIDevice(DRV_GYR_DEVTYPE_BMI088, SPI::CS{GPIO::PortI, GPIO::Pin8}, SPI::DRDY{GPIO::PortI, GPIO::Pin7}),
 		initSPIDevice(DRV_ACC_DEVTYPE_BMI088, SPI::CS{GPIO::PortI, GPIO::Pin4}),

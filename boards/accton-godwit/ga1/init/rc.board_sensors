@@ -77,6 +77,17 @@ icm42688p -R 14 -s -b 1 start
 icm45686 -R 6 -s -b 2 start
 icm45686 -R 14 -s -b 1 start
 
+# Internal SPI bus ICM56686 (alternate part for the ICM42688P/ICM45686 footprint).
+icm56686 -R 6 -s -b 2 start
+icm56686 -R 14 -s -b 1 start
+
+# Internal SPI bus LSM6DSK320X (alternate part for the ICM42688P/ICM45686/ICM56686 footprint).
+# Rotations differ from the Invensense parts because ST defines the die axes with Y and Z
+# inverted relative to Invensense on the same footprint (same delta as px4_fmu-v6c, where
+# icm42688p -R 6 pairs with lsm6dsv -R 26).
+lsm6dsv -R 26 -s -b 2 start
+lsm6dsv -R 6 -s -b 1 start
+
 # Internal magnetometer on I2c
 rm3100 -I -b 4 start
 
